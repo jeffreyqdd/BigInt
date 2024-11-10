@@ -22,7 +22,7 @@ constexpr UnsignedBigInt::UnsignedBigInt(int number) noexcept
 	: m_digits(1)
 	, m_container(UnsignedBigInt::INITIAL_ALLOCATIONS_SIZE, 0) {
 	// static_assert(sizeof(number) <= HEAP_THRESHOLD * sizeof(base_t));
-	assert(number > 0);
+	assert(number >= 0);
 	m_container[0] = number;
 }
 
@@ -145,12 +145,12 @@ UnsignedBigInt UnsignedBigInt::operator/(const UnsignedBigInt& other) const {
 // UnsignedBigInt UnsignedBigInt::operator>>(const UnsignedBigInt& other) const {
 // 	return apply_binary_op(*this, other, &UnsignedBigInt::operator>>=);
 // }
-// UnsignedBigInt UnsignedBigInt::operator^(const UnsignedBigInt& other) const {
-// 	return apply_binary_op(*this, other, &UnsignedBigInt::operator^=);
-// }
-// UnsignedBigInt UnsignedBigInt::operator%(const UnsignedBigInt& other) const {
-// 	return apply_binary_op(*this, other, &UnsignedBigInt::operator%=);
-// }
+UnsignedBigInt UnsignedBigInt::operator^(const UnsignedBigInt& other) const {
+	return apply_binary_op(*this, other, &UnsignedBigInt::operator^=);
+}
+UnsignedBigInt UnsignedBigInt::operator%(const UnsignedBigInt& other) const {
+	return apply_binary_op(*this, other, &UnsignedBigInt::operator%=);
+}
 
 // ============================================================================
 // Section: assignment algebraic operations for primitives
@@ -355,7 +355,6 @@ UnsignedBigInt& UnsignedBigInt::operator-=(const UnsignedBigInt& other) {
 	}
 
 	if(m_digits != 1 && m_container[m_digits - 1] == 0) {
-		assert(false);
 		// if we borrowed from the highest digit,
 		// we need to check if we decreased the number of digits
 		// in the number
@@ -408,16 +407,34 @@ UnsignedBigInt& UnsignedBigInt::operator/=(const UnsignedBigInt& other) {
 	UnsignedBigInt dividend = *this;
 	UnsignedBigInt divisor = other;
 	UnsignedBigInt quotient;
-	quotient.m_container.resize(dividend.m_digits, 0);
 
+	quotient.m_container.resize(dividend.m_digits, 0);
+	quotient.m_digits = dividend.m_digits;
+
+	std::cout << "checking bit alignment" << std::endl;
 	std::cout << dividend.to_bitstring() << std::endl;
 	std::cout << divisor.to_bitstring() << std::endl;
 
-	size_t shift = dividend.m_digits * 64 - divisor.most_significant_bit();
+	int shift = dividend.most_significant_bit() - divisor.most_significant_bit();
 	divisor <<= shift;
 
 	std::cout << dividend.to_bitstring() << std::endl;
 	std::cout << divisor.to_bitstring() << std::endl;
+
+	for(int i = shift; i >= 0; i--) {
+		if(dividend >= divisor) {
+			dividend -= divisor;
+			quotient.set_bit(i, 1);
+		}
+		divisor >>= 1;
+	}
+
+	*this = quotient;
+
+	// normalize
+	while(m_digits > 1 && m_container[m_digits - 1] == 0) {
+		m_digits--;
+	}
 
 	return *this;
 }

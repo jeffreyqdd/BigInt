@@ -4,8 +4,53 @@
 TEST(Division, Simple) {
 	UnsignedBigInt a = std::string("27");
 	UnsignedBigInt b = std::string("5");
+	UnsignedBigInt ans = std::string("5");
 	a /= b;
-	ASSERT_EQ(a.to_string(), "5");
+	std::cout << "ans" << std::endl;
+	std::cout << ans.to_bitstring() << std::endl;
+	ASSERT_EQ(a.to_string(), ans.to_string());
+}
+
+TEST(Division, Simple2) {
+	UnsignedBigInt a = std::string("81");
+	UnsignedBigInt b = std::string("9");
+	UnsignedBigInt ans = std::string("9");
+	a /= b;
+	ASSERT_EQ(a.to_string(), ans.to_string());
+}
+
+TEST(Division, Simple3) {
+	UnsignedBigInt a = std::string("231");
+	UnsignedBigInt b = std::string("33");
+	UnsignedBigInt ans = std::string("7");
+	a /= b;
+	ASSERT_EQ(a.to_string(), ans.to_string());
+}
+
+TEST(Division, Simple4) {
+	UnsignedBigInt a = std::string("231");
+	UnsignedBigInt b = std::string("33");
+	UnsignedBigInt ans = std::string("7");
+	a /= b;
+	ASSERT_EQ(a.to_string(), ans.to_string());
+}
+
+TEST(Division, Medium) {
+	UnsignedBigInt a = std::string("987897893479839813798");
+	UnsignedBigInt b = std::string("231767842");
+	UnsignedBigInt ans = std::string("4262445924140");
+	a /= b;
+	ASSERT_EQ(a.to_string(), ans.to_string());
+}
+
+TEST(Division, Hard) {
+	UnsignedBigInt a = std::string("987897893479839813798428979830275082975098375082374508764725431"
+								   "6254365578348990890895839378452746726352452456245623");
+	UnsignedBigInt b = std::string("123878013787163287649879469873678563874568375693587893267520502"
+								   "75029475809237859025244180748917491764916498716");
+	UnsignedBigInt ans = std::string("797476");
+	a /= b;
+	ASSERT_EQ(a.to_string(), ans.to_string());
 }
 
 int main(int argc, char** argv) {
