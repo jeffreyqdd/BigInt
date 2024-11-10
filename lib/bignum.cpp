@@ -147,9 +147,9 @@ UnsignedBigInt UnsignedBigInt::operator+(const UnsignedBigInt& other) const {
 // UnsignedBigInt UnsignedBigInt::operator-(const UnsignedBigInt& other) const {
 // 	return apply_binary_op(*this, other, &UnsignedBigInt::operator-=);
 // }
-// UnsignedBigInt UnsignedBigInt::operator*(const UnsignedBigInt& other) const {
-// 	return apply_binary_op(*this, other, &UnsignedBigInt::operator*=);
-// }
+UnsignedBigInt UnsignedBigInt::operator*(const UnsignedBigInt& other) const {
+	return apply_binary_op(*this, other, &UnsignedBigInt::operator*=);
+}
 // UnsignedBigInt UnsignedBigInt::operator/(const UnsignedBigInt& other) const {
 // 	return apply_binary_op(*this, other, &UnsignedBigInt::operator/=);
 // }
@@ -327,7 +327,7 @@ UnsignedBigInt& UnsignedBigInt::operator*=(const UnsignedBigInt& other) {
 		}
 	}
 
-	m_digits = buffer.size() - (buffer.back() == 0) ? 1 : 0;
+	m_digits = buffer.size() - ((buffer.back() == 0) ? 1 : 0);
 	m_container = std::move(buffer);
 	return *this;
 }
