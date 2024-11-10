@@ -327,9 +327,14 @@ UnsignedBigInt& UnsignedBigInt::operator*=(const UnsignedBigInt& other) {
 		}
 	}
 
+	m_digits = buffer.size() - (buffer.back() == 0) ? 1 : 0;
 	m_container = std::move(buffer);
 	return *this;
 }
+
+// ============================================================================
+// Section: helpers
+// ============================================================================
 
 std::string UnsignedBigInt::to_string() const {
 	const uint64_t BASE = 1000000000000000000ULL;
