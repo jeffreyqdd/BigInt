@@ -80,6 +80,7 @@
         "__nullptr": "cpp"
     },
     "cSpell.words": [
+        "bignum",
         "KARATSUBA",
         "repr",
         "tparam"

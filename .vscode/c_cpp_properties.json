@@ -4,7 +4,8 @@
             "name": "Linux",
             "includePath": [
                 "${workspaceFolder}/**",
-                "${workspaceFolder}/dependencies/googletest/googletest/include"
+                "${workspaceFolder}/dependencies/googletest/googletest/include",
+                "${workspaceFolder}/dependencies/benchmark/include"
             ],
             "defines": [],
             "intelliSenseMode": "linux-gcc-x64",
