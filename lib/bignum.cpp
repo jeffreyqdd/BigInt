@@ -3,6 +3,7 @@
 #include <bitset>
 #include <cassert>
 #include <cmath>
+#include <cstdint>
 #include <cstring>
 #include <functional>
 #include <iostream>
@@ -266,11 +267,11 @@ UnsignedBigInt& UnsignedBigInt::operator>>=(const uint64_t& other) {
 	const size_t base_shift = other / 64;
 	const size_t bit_shift = other % 64;
 
-	for(int i = 0; i < base_shift; i++) {
+	for(size_t i = 0; i < base_shift; i++) {
 		m_container[i] = 0;
 	}
 
-	for(int i = base_shift; i < m_digits; i++) {
+	for(size_t i = base_shift; i < m_digits; i++) {
 		// start on rightmost digit
 		const __uint128_t after_shift =
 			(static_cast<__uint128_t>(m_container[i]) << 64) >> bit_shift;
@@ -283,11 +284,11 @@ UnsignedBigInt& UnsignedBigInt::operator>>=(const uint64_t& other) {
 		m_container[i - base_shift] = upper_half;
 	}
 
-	if(base_shift >= m_digits) {
-		m_digits -= base_shift
+	for(size_t i = m_digits - base_shift; i < m_digits; i++) {
+		m_container[i] = 0;
 	}
 
-	while(m_digits > 1 && m_container[m_digits] != 0) {
+	while(m_digits > 1 && m_container[m_digits - 1] == 0) {
 		m_digits--;
 	}
 
@@ -389,7 +390,37 @@ UnsignedBigInt& UnsignedBigInt::operator*=(const UnsignedBigInt& other) {
 	return *this;
 }
 
-UnsignedBigInt& UnsignedBigInt::operator/=(const UnsignedBigInt& other) { }
+UnsignedBigInt& UnsignedBigInt::operator/=(const UnsignedBigInt& other) {
+	if(other == UnsignedBigInt(0)) {
+		throw BigNumDivideByZeroException();
+	}
+
+	if(*this < other) {
+		*this = 0;
+		return *this;
+	}
+
+	if(*this == other) {
+		*this = 1;
+		return *this;
+	}
+
+	UnsignedBigInt dividend = *this;
+	UnsignedBigInt divisor = other;
+	UnsignedBigInt quotient;
+	quotient.m_container.resize(dividend.m_digits, 0);
+
+	std::cout << dividend.to_bitstring() << std::endl;
+	std::cout << divisor.to_bitstring() << std::endl;
+
+	size_t shift = dividend.m_digits * 64 - divisor.most_significant_bit();
+	divisor <<= shift;
+
+	std::cout << dividend.to_bitstring() << std::endl;
+	std::cout << divisor.to_bitstring() << std::endl;
+
+	return *this;
+}
 
 // ============================================================================
 // Section: operators
@@ -497,4 +528,21 @@ std::string UnsignedBigInt::to_bitstring() const {
 
 size_t UnsignedBigInt::digits() const noexcept {
 	return m_digits;
+}
+
+size_t UnsignedBigInt::most_significant_bit() const noexcept {
+	size_t ret = (m_digits - 1) * 64;
+	ret += 64 - __builtin_clzll(m_container[m_digits - 1]);
+	return ret;
+}
+
+void UnsignedBigInt::set_bit(size_t idx, bool on) noexcept {
+	size_t block = idx / 64;
+	size_t shift = idx % 64;
+
+	if(on) {
+		m_container[block] |= 1ULL << shift;
+	} else {
+		m_container[block] &= ~(1ULL << shift);
+	}
 }

@@ -9,9 +9,7 @@ TEST(Right, SimpleShift) {
 
 TEST(Right, MediumShift) {
 	UnsignedBigInt a = std::string("9923904823092332894790823448290");
-	std::cout << a.to_bitstring() << std::endl;
 	a >>= 31;
-	std::cout << a.to_bitstring() << std::endl;
 	ASSERT_EQ(a.to_string(), "4621178295040658160481");
 }
 
@@ -19,9 +17,10 @@ TEST(Init, HardShift) {
 	UnsignedBigInt a =
 		std::string("992390482309233289479082234908239057823405972349057234905783924857348957894578"
 					"912456723456737865774653249480565098750678506978905673448290");
-	a <<= 213;
-	ASSERT_EQ(a.to_string(),
-			  "75386488440116526277765946928110317199105972284416019210126339004478387207");
+	UnsignedBigInt ans =
+		std::string("75386488440116526277765946928110317199105972284416019210126339004478387207");
+	a >>= 213;
+	ASSERT_EQ(a.to_string(), ans.to_string());
 }
 
 int main(int argc, char** argv) {

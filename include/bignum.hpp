@@ -109,6 +109,9 @@ public:
 	bool operator!=(const UnsignedBigInt& other) const;
 
 	size_t digits() const noexcept;
+	size_t most_significant_bit() const noexcept;
+	void set_bit(size_t idx, bool on) noexcept;
+
 	std::string to_string() const;
 	std::string to_bitstring() const;
 
@@ -144,7 +147,7 @@ private:
 	container m_container;
 };
 
-class BigNumDivdeByZeroException : public std::exception {
+class BigNumDivideByZeroException : public std::exception {
 	const char* what() const noexcept override {
 		return "cannot divide by zero";
 	}
