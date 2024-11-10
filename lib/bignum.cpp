@@ -151,6 +151,12 @@ UnsignedBigInt UnsignedBigInt::operator^(const UnsignedBigInt& other) const {
 UnsignedBigInt UnsignedBigInt::operator%(const UnsignedBigInt& other) const {
 	return apply_binary_op(*this, other, &UnsignedBigInt::operator%=);
 }
+UnsignedBigInt UnsignedBigInt::modulus_exp(const UnsignedBigInt& exp,
+										   const UnsignedBigInt& mod) const {
+	UnsignedBigInt ret = *this;
+	ret.modulus_exp_eq(exp, mod);
+	return ret;
+}
 
 // ============================================================================
 // Section: assignment algebraic operations for primitives
@@ -470,6 +476,18 @@ UnsignedBigInt& UnsignedBigInt::operator%=(const UnsignedBigInt& other) {
 			*this -= divisor;
 		}
 		divisor >>= 1;
+	}
+
+	return *this;
+}
+
+UnsignedBigInt& UnsignedBigInt::modulus_exp_eq(const UnsignedBigInt& exp,
+											   const UnsignedBigInt& mod) {
+
+	UnsignedBigInt save = *this;
+	for(UnsignedBigInt i = 0; i < exp; i += 1) {
+		*this *= save;
+		*this %= mod;
 	}
 
 	return *this;

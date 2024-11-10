@@ -25,6 +25,18 @@ TEST(Power, Simple2) {
 	ASSERT_EQ(c.to_string(), ans.to_string());
 }
 
+TEST(Power, Zero) {
+	UnsignedBigInt a = std::string("2");
+	UnsignedBigInt b = std::string("0");
+	UnsignedBigInt ans = std::string("1");
+
+	UnsignedBigInt c = a ^ b;
+	a ^= b;
+
+	ASSERT_EQ(a.to_string(), c.to_string());
+	ASSERT_EQ(c.to_string(), ans.to_string());
+}
+
 TEST(Power, Hard) {
 	UnsignedBigInt a = std::string("43982749");
 	UnsignedBigInt b = std::string("398");

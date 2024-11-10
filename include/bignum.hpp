@@ -86,6 +86,7 @@ public:
 	UnsignedBigInt operator/(const UnsignedBigInt& other) const;
 	UnsignedBigInt operator%(const UnsignedBigInt& other) const;
 	UnsignedBigInt operator^(const UnsignedBigInt& other) const;
+	UnsignedBigInt modulus_exp(const UnsignedBigInt& exp, const UnsignedBigInt& mod) const;
 	// UnsignedBigInt operator<<(const UnsignedBigInt& other) const;
 	// UnsignedBigInt operator>>(const UnsignedBigInt& other) const;
 
@@ -95,6 +96,7 @@ public:
 	UnsignedBigInt& operator/=(const UnsignedBigInt& other);
 	UnsignedBigInt& operator%=(const UnsignedBigInt& other);
 	UnsignedBigInt& operator^=(const UnsignedBigInt& other);
+	UnsignedBigInt& modulus_exp_eq(const UnsignedBigInt& exp, const UnsignedBigInt& mod);
 	// UnsignedBigInt& operator<<=(const UnsignedBigInt& other);
 	// UnsignedBigInt& operator>>=(const UnsignedBigInt& other);
 
