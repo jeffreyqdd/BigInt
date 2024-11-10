@@ -55,11 +55,12 @@ int main(int argc, char* argv[]) {
 		char* number2 = argv[3];
 		char* number3 = argv[4];
 
-		if(!valid(number1))
-			return 1;
-		if(!valid(number2))
-			return 1;
-		if(!valid(number3))
+		bool good = true;
+		good &= valid(number1);
+		good &= valid(number2);
+		good &= valid(number3);
+
+		if(!good)
 			return 1;
 
 		std::cout << "bignum ^ " << number1 << " " << number2 << " " << number3 << std::endl;
@@ -78,10 +79,14 @@ int main(int argc, char* argv[]) {
 	} else {
 		char* number1 = argv[2];
 		char* number2 = argv[3];
-		if(!valid(number1))
+
+		bool good = true;
+		good &= valid(number1);
+		good &= valid(number2);
+
+		if(!good)
 			return 1;
-		if(!valid(number2))
-			return 1;
+
 		std::cout << "bignum " << argv[1] << " " << number1 << " " << number2 << std::endl;
 
 		UnsignedBigInt n1(number1);

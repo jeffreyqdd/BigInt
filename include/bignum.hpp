@@ -4,7 +4,6 @@
 
 #include <cassert>
 #include <cstdint>
-#include <format>
 #include <limits>
 #include <memory>
 #include <string>
@@ -17,25 +16,25 @@ public:
 	// Section: Includes and Imports
 	// =============================
 
-	constexpr UnsignedBigInt() noexcept
+	UnsignedBigInt() noexcept
 		: m_digits(1)
 		, m_container(UnsignedBigInt::INITIAL_ALLOCATIONS_SIZE, 0) { }
 
-	constexpr UnsignedBigInt(int number) noexcept
+	UnsignedBigInt(int number) noexcept
 		: m_digits(1)
 		, m_container(UnsignedBigInt::INITIAL_ALLOCATIONS_SIZE, 0) {
 		assert(number >= 0);
 		m_container[0] = number;
 	}
 
-	constexpr UnsignedBigInt(uint64_t number) noexcept
+	UnsignedBigInt(uint64_t number) noexcept
 		: m_digits(1)
 		, m_container(UnsignedBigInt::INITIAL_ALLOCATIONS_SIZE, 0) {
 		// static_assert(sizeof(number) <= HEAP_THRESHOLD * sizeof(base_t));
 		m_container[0] = number;
 	}
 
-	constexpr UnsignedBigInt(__uint128_t number) noexcept
+	UnsignedBigInt(__uint128_t number) noexcept
 		: m_digits(number & UPPER_MASK_128 ? 2 : 1)
 		, m_container(UnsignedBigInt::INITIAL_ALLOCATIONS_SIZE, 0) {
 		// treat 0th index as pointer to __uint128, setting both at once
@@ -173,10 +172,10 @@ private:
 
 public:
 	explicit BigNumUnderflowException(const UnsignedBigInt& lhs, const uint64_t& rhs) {
-		_error_msg = std::format("cannot subtract {} from {}", rhs, lhs.to_string());
+		_error_msg = "cannot subtract " + std::to_string(rhs) + " from " + lhs.to_string();
 	}
 	explicit BigNumUnderflowException(const UnsignedBigInt& lhs, const UnsignedBigInt& rhs) {
-		_error_msg = std::format("cannot subtract {} from {}", rhs.to_string(), lhs.to_string());
+		_error_msg = "cannot subtract " + rhs.to_string() + " from " + lhs.to_string();
 	}
 
 	const char* what() const noexcept override {

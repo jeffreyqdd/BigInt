@@ -8,12 +8,6 @@ project(bignum LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(BUILD_GTEST OFF CACHE BOOL "Disable GoogleTest build" FORCE)
-set(BENCHMARK_ENABLE_TESTING OFF CACHE BOOL "Disable Benchmark testing" FORCE)
-
-add_subdirectory(dependencies/googletest)
-add_subdirectory(dependencies/benchmark)
-
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0 -DDEBUG -ftrapv -fsanitize=undefined")
     message(STATUS "Building in Debug mode")
@@ -42,11 +36,15 @@ target_link_libraries(bignum PRIVATE hw4_lib)
 
 # benchmarks
 if(BUILD_BENCHMARK STREQUAL "YES")
+    set(BENCHMARK_ENABLE_TESTING OFF CACHE BOOL "Disable Benchmark testing" FORCE)
+    add_subdirectory(dependencies/benchmark)
     add_executable(bench_primitives benchmarks/bench_primitives.cpp)
     target_link_libraries(bench_primitives PRIVATE benchmark::benchmark pthread)
 endif()
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set(BUILD_GTEST OFF CACHE BOOL "Disable GoogleTest build" FORCE)
+    add_subdirectory(dependencies/googletest)
     # tests
     # Add tests to CMake
     enable_testing()

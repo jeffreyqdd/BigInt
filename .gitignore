@@ -5,3 +5,4 @@ build-Release/*
 build-RelWithDebInfo/*
 
 dependencies/
+*.zip
