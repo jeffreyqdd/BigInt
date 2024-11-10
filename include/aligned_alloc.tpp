@@ -15,7 +15,8 @@ struct AlignedAllocator {
 	constexpr AlignedAllocator(const AlignedAllocator<U>&) noexcept { }
 
 	T* allocate(std::size_t n) {
-		void* ptr = std::aligned_alloc(64, n * sizeof(T));
+		size_t total_size = ((n * sizeof(T) + 63) / 64) * 64;
+		void* ptr = std::aligned_alloc(64, total_size);
 		if(!ptr) {
 			throw std::bad_alloc();
 		}

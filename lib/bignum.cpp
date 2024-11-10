@@ -13,36 +13,6 @@
 // ============================================================================
 // Section: Constructors
 // ============================================================================
-
-constexpr UnsignedBigInt::UnsignedBigInt() noexcept
-	: m_digits(1)
-	, m_container(UnsignedBigInt::INITIAL_ALLOCATIONS_SIZE, 0) { }
-
-constexpr UnsignedBigInt::UnsignedBigInt(int number) noexcept
-	: m_digits(1)
-	, m_container(UnsignedBigInt::INITIAL_ALLOCATIONS_SIZE, 0) {
-	// static_assert(sizeof(number) <= HEAP_THRESHOLD * sizeof(base_t));
-	assert(number >= 0);
-	m_container[0] = number;
-}
-
-constexpr UnsignedBigInt::UnsignedBigInt(uint64_t number) noexcept
-	: m_digits(1)
-	, m_container(UnsignedBigInt::INITIAL_ALLOCATIONS_SIZE, 0) {
-	// static_assert(sizeof(number) <= HEAP_THRESHOLD * sizeof(base_t));
-	m_container[0] = number;
-}
-
-constexpr UnsignedBigInt::UnsignedBigInt(__uint128_t number) noexcept
-	: m_digits(number & UPPER_MASK_128 ? 2 : 1)
-	, m_container(UnsignedBigInt::INITIAL_ALLOCATIONS_SIZE, 0) {
-	// static_assert(sizeof(number) <= HEAP_THRESHOLD * sizeof(base_t));
-
-	// treat 0th index as pointer to __uint128, setting both at once
-	// without masks or shifts
-	*reinterpret_cast<__uint128_t*>(m_container.data()) = number;
-}
-
 UnsignedBigInt::UnsignedBigInt(const std::string& number)
 	: m_digits(1)
 	, m_container(UnsignedBigInt::INITIAL_ALLOCATIONS_SIZE, 0) {
@@ -417,15 +387,15 @@ UnsignedBigInt& UnsignedBigInt::operator/=(const UnsignedBigInt& other) {
 	quotient.m_container.resize(dividend.m_digits, 0);
 	quotient.m_digits = dividend.m_digits;
 
-	std::cout << "checking bit alignment" << std::endl;
-	std::cout << dividend.to_bitstring() << std::endl;
-	std::cout << divisor.to_bitstring() << std::endl;
+	// std::cout << "checking bit alignment" << std::endl;
+	// std::cout << dividend.to_bitstring() << std::endl;
+	// std::cout << divisor.to_bitstring() << std::endl;
 
 	int shift = dividend.most_significant_bit() - divisor.most_significant_bit();
 	divisor <<= shift;
 
-	std::cout << dividend.to_bitstring() << std::endl;
-	std::cout << divisor.to_bitstring() << std::endl;
+	// std::cout << dividend.to_bitstring() << std::endl;
+	// std::cout << divisor.to_bitstring() << std::endl;
 
 	for(int i = shift; i >= 0; i--) {
 		if(dividend >= divisor) {
@@ -467,6 +437,15 @@ UnsignedBigInt& UnsignedBigInt::operator%=(const UnsignedBigInt& other) {
 		throw BigNumDivideByZeroException();
 	}
 
+	if(*this == other) {
+		*this = 0;
+		return *this;
+	}
+
+	if(*this < other) {
+		return *this;
+	}
+
 	UnsignedBigInt divisor = other;
 	int shift = most_significant_bit() - divisor.most_significant_bit();
 	divisor <<= shift;
@@ -478,13 +457,21 @@ UnsignedBigInt& UnsignedBigInt::operator%=(const UnsignedBigInt& other) {
 		divisor >>= 1;
 	}
 
+	// normalize
+	while(m_digits > 1 && m_container[m_digits - 1] == 0) {
+		m_digits--;
+	}
+
 	return *this;
 }
 
 UnsignedBigInt& UnsignedBigInt::modulus_exp_eq(const UnsignedBigInt& exp,
 											   const UnsignedBigInt& mod) {
 
-	UnsignedBigInt save = *this;
+	UnsignedBigInt save = *this % mod;
+	*this = 1;
+	*this %= mod;
+
 	for(UnsignedBigInt i = 0; i < exp; i += 1) {
 		*this *= save;
 		*this %= mod;

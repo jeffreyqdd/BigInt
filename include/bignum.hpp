@@ -2,6 +2,7 @@
 
 #include "aligned_alloc.tpp"
 
+#include <cassert>
 #include <cstdint>
 #include <format>
 #include <limits>
@@ -16,20 +17,31 @@ public:
 	// Section: Includes and Imports
 	// =============================
 
-	/// @brief
-	constexpr UnsignedBigInt() noexcept;
+	constexpr UnsignedBigInt() noexcept
+		: m_digits(1)
+		, m_container(UnsignedBigInt::INITIAL_ALLOCATIONS_SIZE, 0) { }
 
-	/// @brief
-	/// @param number
-	constexpr UnsignedBigInt(int number) noexcept;
+	constexpr UnsignedBigInt(int number) noexcept
+		: m_digits(1)
+		, m_container(UnsignedBigInt::INITIAL_ALLOCATIONS_SIZE, 0) {
+		assert(number >= 0);
+		m_container[0] = number;
+	}
 
-	/// @brief
-	/// @param number
-	constexpr UnsignedBigInt(uint64_t number) noexcept;
+	constexpr UnsignedBigInt(uint64_t number) noexcept
+		: m_digits(1)
+		, m_container(UnsignedBigInt::INITIAL_ALLOCATIONS_SIZE, 0) {
+		// static_assert(sizeof(number) <= HEAP_THRESHOLD * sizeof(base_t));
+		m_container[0] = number;
+	}
 
-	/// @brief
-	/// @param number
-	constexpr UnsignedBigInt(__uint128_t number) noexcept;
+	constexpr UnsignedBigInt(__uint128_t number) noexcept
+		: m_digits(number & UPPER_MASK_128 ? 2 : 1)
+		, m_container(UnsignedBigInt::INITIAL_ALLOCATIONS_SIZE, 0) {
+		// treat 0th index as pointer to __uint128, setting both at once
+		// without masks or shifts
+		*reinterpret_cast<__uint128_t*>(m_container.data()) = number;
+	}
 
 	/// @brief
 	/// @param number
