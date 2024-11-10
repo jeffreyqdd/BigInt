@@ -4,25 +4,10 @@
 #include <cassert>
 #include <cmath>
 #include <cstring>
-#include <format>
 #include <functional>
 #include <iostream>
 #include <sstream>
 #include <string>
-
-class BigNumUnderflowException : public std::exception {
-private:
-	std::string _error_msg;
-
-public:
-	explicit BigNumUnderflowException(const UnsignedBigInt& lhs, const uint64_t& rhs) {
-		_error_msg = std::format("cannot subtract {} from {}", rhs, lhs.to_string());
-	}
-
-	const char* what() const noexcept override {
-		return _error_msg.c_str();
-	}
-};
 
 // ============================================================================
 // Section: Constructors
@@ -144,9 +129,9 @@ UnsignedBigInt UnsignedBigInt::operator*(const uint64_t& other) const {
 UnsignedBigInt UnsignedBigInt::operator+(const UnsignedBigInt& other) const {
 	return apply_binary_op(*this, other, &UnsignedBigInt::operator+=);
 }
-// UnsignedBigInt UnsignedBigInt::operator-(const UnsignedBigInt& other) const {
-// 	return apply_binary_op(*this, other, &UnsignedBigInt::operator-=);
-// }
+UnsignedBigInt UnsignedBigInt::operator-(const UnsignedBigInt& other) const {
+	return apply_binary_op(*this, other, &UnsignedBigInt::operator-=);
+}
 UnsignedBigInt UnsignedBigInt::operator*(const UnsignedBigInt& other) const {
 	return apply_binary_op(*this, other, &UnsignedBigInt::operator*=);
 }
@@ -274,7 +259,6 @@ UnsignedBigInt& UnsignedBigInt::operator<<=(const uint64_t& other) {
 // Section: assignment algebraic operations for big ints
 // ============================================================================
 UnsignedBigInt& UnsignedBigInt::operator+=(const UnsignedBigInt& other) {
-	size_t min_digit = std::min(m_digits, other.m_digits);
 	size_t max_digit = std::max(m_digits, other.m_digits);
 
 	// reserve 1 more space to account for carry
@@ -307,6 +291,40 @@ UnsignedBigInt& UnsignedBigInt::operator+=(const UnsignedBigInt& other) {
 	return *this;
 }
 
+UnsignedBigInt& UnsignedBigInt::operator-=(const UnsignedBigInt& other) {
+	if(*this < other) {
+		throw BigNumUnderflowException(*this, other);
+	}
+
+	uint64_t borrow = 0;
+	for(size_t i = 0; i < other.m_digits || borrow != 0; i++) {
+		// Get the current digit of b or 0 if we're beyond its size
+
+		const __uint128_t lhs = m_container[i];
+		const __uint128_t rhs = (i < other.m_digits) ? other.m_container[i] : 0;
+
+		if(lhs >= rhs + borrow) {
+			// can absorb the subtraction
+			m_container[i] = lhs - borrow - rhs;
+			borrow = 0;
+		} else {
+			// do the subtraction first to avoid overflow
+			m_container[i] += ((UnsignedBigInt::MAX_U64_VALUE - rhs) - borrow) + 1;
+			borrow = 1;
+		}
+	}
+
+	if(m_digits != 1 && m_container[m_digits - 1] == 0) {
+		assert(false);
+		// if we borrowed from the highest digit,
+		// we need to check if we decreased the number of digits
+		// in the number
+		m_digits--;
+	}
+
+	return *this;
+}
+
 UnsignedBigInt& UnsignedBigInt::operator*=(const UnsignedBigInt& other) {
 
 	container buffer(m_digits + other.m_digits, 0);
@@ -330,6 +348,61 @@ UnsignedBigInt& UnsignedBigInt::operator*=(const UnsignedBigInt& other) {
 	m_digits = buffer.size() - ((buffer.back() == 0) ? 1 : 0);
 	m_container = std::move(buffer);
 	return *this;
+}
+
+// ============================================================================
+// Section: operators
+// ============================================================================
+bool UnsignedBigInt::operator<(const UnsignedBigInt& other) const {
+	if(m_digits != other.m_digits) {
+		return m_digits < other.m_digits;
+	}
+
+	for(size_t i = m_digits; i > 0; i--) {
+		if(m_container[i - 1] != other.m_container[i - 1]) {
+			return m_container[i - 1] < other.m_container[i - 1];
+		}
+	}
+
+	return false;
+}
+
+bool UnsignedBigInt::operator>(const UnsignedBigInt& other) const {
+	if(m_digits != other.m_digits) {
+		return m_digits > other.m_digits;
+	}
+
+	for(size_t i = m_digits; i > 0; i--) {
+		if(m_container[i - 1] != other.m_container[i - 1]) {
+			return m_container[i - 1] > other.m_container[i - 1];
+		}
+	}
+
+	return false;
+}
+
+bool UnsignedBigInt::operator<=(const UnsignedBigInt& other) const {
+	return !(*this > other);
+}
+bool UnsignedBigInt::operator>=(const UnsignedBigInt& other) const {
+	return !(*this < other);
+}
+
+bool UnsignedBigInt::operator==(const UnsignedBigInt& other) const {
+	if(m_digits != other.m_digits) {
+		return false;
+	}
+
+	for(size_t i = m_digits; i > 0; i--) {
+		if(m_container[i - 1] != other.m_container[i - 1]) {
+			return false;
+		}
+	}
+	return true;
+}
+
+bool UnsignedBigInt::operator!=(const UnsignedBigInt& other) const {
+	return !(*this == other);
 }
 
 // ============================================================================

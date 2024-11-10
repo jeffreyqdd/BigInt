@@ -3,12 +3,12 @@
 #include "aligned_alloc.tpp"
 
 #include <cstdint>
+#include <format>
 #include <limits>
 #include <memory>
 #include <string>
 #include <vector>
 
-class BigNumUnderflowException;
 class BigNumRepresentationException;
 
 /// @brief immutable container representing unsigned numbers in little endian format
@@ -100,6 +100,16 @@ public:
 	// UnsignedBigInt& operator<<=(const UnsignedBigInt& other);
 	// UnsignedBigInt& operator>>=(const UnsignedBigInt& other);
 
+	// =============================
+	// Section: Comparators
+	// =============================
+	bool operator<(const UnsignedBigInt& other) const;
+	bool operator>(const UnsignedBigInt& other) const;
+	bool operator<=(const UnsignedBigInt& other) const;
+	bool operator>=(const UnsignedBigInt& other) const;
+	bool operator==(const UnsignedBigInt& other) const;
+	bool operator!=(const UnsignedBigInt& other) const;
+
 	size_t digits() const noexcept;
 	std::string to_string() const;
 	std::string to_bitstring() const;
@@ -134,4 +144,21 @@ private:
 
 	size_t m_digits;
 	container m_container;
+};
+
+class BigNumUnderflowException : public std::exception {
+private:
+	std::string _error_msg;
+
+public:
+	explicit BigNumUnderflowException(const UnsignedBigInt& lhs, const uint64_t& rhs) {
+		_error_msg = std::format("cannot subtract {} from {}", rhs, lhs.to_string());
+	}
+	explicit BigNumUnderflowException(const UnsignedBigInt& lhs, const UnsignedBigInt& rhs) {
+		_error_msg = std::format("cannot subtract {} from {}", rhs.to_string(), lhs.to_string());
+	}
+
+	const char* what() const noexcept override {
+		return _error_msg.c_str();
+	}
 };
