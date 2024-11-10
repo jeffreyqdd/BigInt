@@ -9,8 +9,6 @@
 #include <string>
 #include <vector>
 
-class BigNumRepresentationException;
-
 /// @brief immutable container representing unsigned numbers in little endian format
 class UnsignedBigInt {
 public:
@@ -69,15 +67,15 @@ public:
 	UnsignedBigInt operator-(const uint64_t& other) const;
 	UnsignedBigInt operator*(const uint64_t& other) const;
 	// UnsignedBigInt operator/(const uint64_t& other) const;
-	// UnsignedBigInt operator<<(const uint64_t& other) const;
-	// UnsignedBigInt operator>>(const uint64_t& other) const;
+	UnsignedBigInt operator<<(const uint64_t& other) const;
+	UnsignedBigInt operator>>(const uint64_t& other) const;
 
 	UnsignedBigInt& operator+=(const uint64_t& other);
 	UnsignedBigInt& operator-=(const uint64_t& other);
 	UnsignedBigInt& operator*=(const uint64_t& other);
 	// UnsignedBigInt& operator/=(const uint64_t& other);
-	// UnsignedBigInt& operator<<=(const uint64_t& other);
-	// UnsignedBigInt& operator>>=(const uint64_t& other);
+	UnsignedBigInt& operator<<=(const uint64_t& other);
+	UnsignedBigInt& operator>>=(const uint64_t& other);
 
 	// =============================
 	// Section: Includes and Imports
@@ -144,6 +142,12 @@ private:
 
 	size_t m_digits;
 	container m_container;
+};
+
+class BigNumDivdeByZeroException : public std::exception {
+	const char* what() const noexcept override {
+		return "cannot divide by zero";
+	}
 };
 
 class BigNumUnderflowException : public std::exception {
