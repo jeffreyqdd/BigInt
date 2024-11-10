@@ -439,6 +439,25 @@ UnsignedBigInt& UnsignedBigInt::operator/=(const UnsignedBigInt& other) {
 	return *this;
 }
 
+UnsignedBigInt& UnsignedBigInt::operator^=(const UnsignedBigInt& other) {
+	UnsignedBigInt res = 1;
+	UnsignedBigInt n = other;
+
+	while(n > UnsignedBigInt(0)) {
+		int last_bit = n.m_container[0] & 1;
+		if(last_bit) {
+			res *= (*this);
+		}
+		*this *= *this;
+		n >>= 1;
+	}
+
+	*this = res;
+	return *this;
+}
+
+UnsignedBigInt& UnsignedBigInt::operator%=(const UnsignedBigInt& other) { }
+
 // ============================================================================
 // Section: operators
 // ============================================================================
