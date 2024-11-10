@@ -9,6 +9,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_subdirectory(dependencies/googletest)
+add_subdirectory(dependencies/benchmark)
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0 -DDEBUG")
@@ -34,19 +35,23 @@ target_include_directories(hw4_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 add_executable(bignum src/part1.cpp)
 target_link_libraries(bignum PRIVATE hw4_lib)
 
+# benchmarks
+add_executable(bench_primitives benchmarks/bench_primitives.cpp)
+target_link_libraries(bench_primitives PRIVATE benchmark::benchmark pthread)
+
 # tests
 # Add tests to CMake
 enable_testing()
 include(GoogleTest)
 list(APPEND CMAKE_CTEST_ARGUMENTS "--output-on-failure")
 
-add_executable(test_uint64 tests/test_uint64_operations.cpp)
-target_link_libraries(test_uint64 PRIVATE hw4_lib gtest_main)
-gtest_discover_tests(test_uint64)
+function(add_gtest_executable test_name test_source)
+    add_executable(${test_name} ${test_source})
+    target_link_libraries(${test_name} PRIVATE hw4_lib gtest_main)
+    gtest_discover_tests(${test_name})
+endfunction()
 
-add_executable(test_init tests/test_init.cpp)
-target_link_libraries(test_init PRIVATE hw4_lib gtest_main)
-gtest_discover_tests(test_init)
-
-
-
+file(GLOB TEST_SOURCES "${CMAKE_SOURCE_DIR}/tests/*.cpp")
+foreach(test_file ${TEST_SOURCES})
+    add_gtest_executable(${test_file})
+endforeach()
