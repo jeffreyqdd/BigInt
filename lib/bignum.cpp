@@ -232,14 +232,14 @@ UnsignedBigInt& UnsignedBigInt::operator*=(const uint64_t& other) {
 UnsignedBigInt& UnsignedBigInt::operator<<=(const uint64_t& other) {
 	const size_t base_shift = other / 64;
 	const size_t bit_shift = other % 64;
-	const size_t required_size = m_digits + base_shift + 2;
+	const size_t required_size = m_digits + base_shift + (bit_shift != 0);
 
 	m_container.resize(required_size, 0);
 
 	for(int i = m_digits - 1; i >= 0; i--) {
 		// start on rightmost digit
 		const __uint128_t after_shift = static_cast<__uint128_t>(m_container[i]) << bit_shift;
-		const uint64_t upper_half = static_cast<uint64_t>(after_shift >> 64ull);
+		const uint64_t upper_half = static_cast<uint64_t>(after_shift >> 64);
 		const uint64_t lower_half = static_cast<uint64_t>(after_shift); // use truncation
 
 		// because we're going from right to left, assume upper half is already set
@@ -253,7 +253,43 @@ UnsignedBigInt& UnsignedBigInt::operator<<=(const uint64_t& other) {
 		m_container[i] = 0;
 	}
 
-	m_digits += base_shift;
+	// if leading zeros not used
+	m_digits = required_size;
+	if(m_digits > 1 && m_container[m_digits - 1] == 0) {
+		m_digits--;
+	}
+
+	return *this;
+}
+
+UnsignedBigInt& UnsignedBigInt::operator>>=(const uint64_t& other) {
+	const size_t base_shift = other / 64;
+	const size_t bit_shift = other % 64;
+
+	for(int i = 0; i < base_shift; i++) {
+		m_container[i] = 0;
+	}
+
+	for(int i = base_shift; i < m_digits; i++) {
+		// start on rightmost digit
+		const __uint128_t after_shift =
+			(static_cast<__uint128_t>(m_container[i]) << 64) >> bit_shift;
+		const uint64_t upper_half = static_cast<uint64_t>(after_shift >> 64);
+		const uint64_t lower_half = static_cast<uint64_t>(after_shift); // use truncation
+
+		if(i > base_shift) {
+			m_container[i - base_shift - 1] |= lower_half;
+		}
+		m_container[i - base_shift] = upper_half;
+	}
+
+	if(base_shift >= m_digits) {
+		m_digits -= base_shift
+	}
+
+	while(m_digits > 1 && m_container[m_digits] != 0) {
+		m_digits--;
+	}
 
 	return *this;
 }
