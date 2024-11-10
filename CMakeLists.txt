@@ -24,7 +24,7 @@ else()
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -DNDEBUG")
 endif()
 
-add_compile_options(-march=native -flto=auto)
+add_compile_options(-march=native -flto=auto -Wpedantic -Wall)
 
 add_library(hw4_lib STATIC
     lib/bignum.cpp
@@ -38,6 +38,7 @@ target_link_libraries(bignum PRIVATE hw4_lib)
 # Add tests to CMake
 enable_testing()
 include(GoogleTest)
+list(APPEND CMAKE_CTEST_ARGUMENTS "--output-on-failure")
 
 add_executable(test_uint64 tests/test_uint64_operations.cpp)
 target_link_libraries(test_uint64 PRIVATE hw4_lib gtest_main)

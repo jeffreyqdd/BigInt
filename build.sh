@@ -13,11 +13,6 @@ build_path="build-${build_type}"
 mkdir -p "${build_path}"
 cd "${build_path}" || return
 cmake "${cmake_defs}" ..
-NPROC=$(nproc)
 
-if [ "$NPROC" -lt 2 ]; then
-    NPROC=2
-fi
-
-make -j "$(("$NPROC" - 1))"
+make -j 16
 cd ..
