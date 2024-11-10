@@ -3,65 +3,135 @@
 #include "aligned_alloc.tpp"
 
 #include <cstdint>
+#include <limits>
+#include <memory>
 #include <string>
 #include <vector>
 
-typedef std::vector<uint64_t, AlignedAllocator<uint64_t>> container;
-
 class BigNumUnderflowException;
+class BigNumRepresentationException;
 
-/// @brief immutable big num container representing unsigned numbers in little endian format
-class BigNum {
+/// @brief immutable container representing unsigned numbers in little endian format
+class UnsignedBigInt {
 public:
-	/// @brief construct big num with default value = 0
-	BigNum(size_t allocation_size = BigNum::INITIAL_ALLOCATIONS_SIZE);
-	BigNum(const std::string& number);
+	// =============================
+	// Section: Includes and Imports
+	// =============================
 
-	/// @brief construct big num from string representation
-	// BigNum(const std::string& s);
+	/// @brief
+	constexpr UnsignedBigInt() noexcept;
 
-	BigNum operator+(const uint64_t& other) const;
-	BigNum operator-(const uint64_t& other) const;
-	BigNum operator*(const uint64_t& other) const;
-	BigNum operator/(const uint64_t& other) const;
-	BigNum operator<<(const uint64_t& other) const;
-	BigNum operator>>(const uint64_t& other) const;
+	/// @brief
+	/// @param number
+	constexpr UnsignedBigInt(int number) noexcept;
 
-	BigNum& operator+=(const uint64_t& other);
-	BigNum& operator-=(const uint64_t& other);
-	BigNum& operator*=(const uint64_t& other);
-	BigNum& operator/=(const uint64_t& other);
-	BigNum& operator<<=(const uint64_t& other);
-	BigNum& operator>>=(const uint64_t& other);
+	/// @brief
+	/// @param number
+	constexpr UnsignedBigInt(uint64_t number) noexcept;
 
-	BigNum operator+(const BigNum& other) const;
-	BigNum operator-(const BigNum& other) const;
-	BigNum operator*(const BigNum& other) const;
-	BigNum operator/(const BigNum& other) const;
-	BigNum operator%(const BigNum& other) const;
-	BigNum operator^(const BigNum& other) const;
-	BigNum operator<<(const BigNum& other) const;
-	BigNum operator>>(const BigNum& other) const;
+	/// @brief
+	/// @param number
+	constexpr UnsignedBigInt(__uint128_t number) noexcept;
 
-	BigNum& operator+=(const BigNum& other);
-	BigNum& operator-=(const BigNum& other);
-	BigNum& operator*=(const BigNum& other);
-	BigNum& operator/=(const BigNum& other);
-	BigNum& operator%=(const BigNum& other);
-	BigNum& operator^=(const BigNum& other);
-	BigNum& operator<<=(const BigNum& other);
-	BigNum& operator>>=(const BigNum& other);
+	/// @brief
+	/// @param number
+	UnsignedBigInt(const std::string& number);
 
+	/// @brief
+	/// @param number
+	/// @return
+	UnsignedBigInt& operator=(const int& number);
+
+	/// @brief
+	/// @param number
+	/// @return
+	UnsignedBigInt& operator=(const uint64_t& number);
+
+	/// @brief
+	/// @param number
+	/// @return
+	UnsignedBigInt& operator=(const __uint128_t& number);
+
+	/// @brief
+	/// @param number
+	/// @return
+	UnsignedBigInt& operator=(const std::string& number);
+
+	/// @brief
+	/// @param number
+	/// @return
+	UnsignedBigInt& operator=(const UnsignedBigInt& number);
+
+	// =============================
+	// Section: Includes and Imports
+	// =============================
+	UnsignedBigInt operator+(const uint64_t& other) const;
+	UnsignedBigInt operator-(const uint64_t& other) const;
+	UnsignedBigInt operator*(const uint64_t& other) const;
+	// UnsignedBigInt operator/(const uint64_t& other) const;
+	// UnsignedBigInt operator<<(const uint64_t& other) const;
+	// UnsignedBigInt operator>>(const uint64_t& other) const;
+
+	UnsignedBigInt& operator+=(const uint64_t& other);
+	UnsignedBigInt& operator-=(const uint64_t& other);
+	UnsignedBigInt& operator*=(const uint64_t& other);
+	// UnsignedBigInt& operator/=(const uint64_t& other);
+	// UnsignedBigInt& operator<<=(const uint64_t& other);
+	// UnsignedBigInt& operator>>=(const uint64_t& other);
+
+	// =============================
+	// Section: Includes and Imports
+	// =============================
+	UnsignedBigInt operator+(const UnsignedBigInt& other) const;
+	UnsignedBigInt operator-(const UnsignedBigInt& other) const;
+	UnsignedBigInt operator*(const UnsignedBigInt& other) const;
+	UnsignedBigInt operator/(const UnsignedBigInt& other) const;
+	UnsignedBigInt operator%(const UnsignedBigInt& other) const;
+	UnsignedBigInt operator^(const UnsignedBigInt& other) const;
+	// UnsignedBigInt operator<<(const UnsignedBigInt& other) const;
+	// UnsignedBigInt operator>>(const UnsignedBigInt& other) const;
+
+	UnsignedBigInt& operator+=(const UnsignedBigInt& other);
+	UnsignedBigInt& operator-=(const UnsignedBigInt& other);
+	UnsignedBigInt& operator*=(const UnsignedBigInt& other);
+	UnsignedBigInt& operator/=(const UnsignedBigInt& other);
+	UnsignedBigInt& operator%=(const UnsignedBigInt& other);
+	UnsignedBigInt& operator^=(const UnsignedBigInt& other);
+	// UnsignedBigInt& operator<<=(const UnsignedBigInt& other);
+	// UnsignedBigInt& operator>>=(const UnsignedBigInt& other);
+
+	size_t digits() const noexcept;
 	std::string to_string() const;
 	std::string to_bitstring() const;
 
+	~UnsignedBigInt() = default;
+
 private:
-	static constexpr size_t KARATSUBA_THRESHOLD = 30;
-	static constexpr size_t INITIAL_ALLOCATIONS_SIZE = 8;
+	typedef uint64_t base_t;
+	typedef __uint128_t carry_t;
+	typedef std::vector<base_t, AlignedAllocator<base_t>> container;
 
-	size_t leading_digit() const;
+	// class container {
+	// 	std::unique_ptr<base_t[]> m_digits;
+	// 	size_t m_capacity;
+	// };
 
-	/// @brief use base 2^64 as repr because int64 operations are faster on x86
-	// TODO: look into efficient memory allocation
-	container _digits;
+	inline static constexpr uint64_t MAX_U64_VALUE = std::numeric_limits<uint64_t>::max();
+	inline static constexpr uint64_t LOWER_MASK_64 = 0x00000000FFFFFFFFull;
+	inline static constexpr uint64_t UPPER_MASK_64 = 0xFFFFFFFF00000000ull;
+
+	inline static constexpr __uint128_t LOWER_MASK_128 =
+		static_cast<__uint128_t>(0xFFFFFFFFFFFFFFFF);
+	inline static constexpr __uint128_t UPPER_MASK_128 =
+		static_cast<__uint128_t>(0xFFFFFFFFFFFFFFFF) << 64;
+
+	// inline static constexpr size_t KARATSUBA_THRESHOLD = 30;
+	// inline static constexpr size_t FFT_THRESHOLD = 50000;
+	inline static constexpr size_t INITIAL_ALLOCATIONS_SIZE = 8;
+
+	// inline static constexpr size_t HEAP_THRESHOLD = sizeof(container) / sizeof(base_t);
+	// inline static constexpr carry_t STORAGE_MASK = std::numeric_limits<base_t>::max();
+
+	size_t m_digits;
+	container m_container;
 };

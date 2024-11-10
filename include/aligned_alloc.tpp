@@ -25,4 +25,12 @@ struct AlignedAllocator {
 	void deallocate(T* p, std::size_t) noexcept {
 		std::free(p);
 	}
+
+	bool operator==(const AlignedAllocator&) const noexcept {
+		return true; // All instances of this allocator type are considered equal
+	}
+
+	bool operator!=(const AlignedAllocator&) const noexcept {
+		return false; // If `==` returns true, `!=` should return false
+	}
 };
