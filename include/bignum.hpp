@@ -8,6 +8,8 @@
 
 typedef std::vector<uint64_t, AlignedAllocator<uint64_t>> container;
 
+class BigNumUnderflowException;
+
 /// @brief immutable big num container representing unsigned numbers in little endian format
 class BigNum {
 public:
@@ -22,8 +24,6 @@ public:
 	BigNum operator-(const uint64_t& other) const;
 	BigNum operator*(const uint64_t& other) const;
 	BigNum operator/(const uint64_t& other) const;
-	BigNum operator%(const uint64_t& other) const;
-	BigNum operator^(const uint64_t& other) const;
 	BigNum operator<<(const uint64_t& other) const;
 	BigNum operator>>(const uint64_t& other) const;
 
@@ -31,8 +31,6 @@ public:
 	BigNum& operator-=(const uint64_t& other);
 	BigNum& operator*=(const uint64_t& other);
 	BigNum& operator/=(const uint64_t& other);
-	BigNum& operator%=(const uint64_t& other);
-	BigNum& operator^=(const uint64_t& other);
 	BigNum& operator<<=(const uint64_t& other);
 	BigNum& operator>>=(const uint64_t& other);
 
@@ -55,10 +53,13 @@ public:
 	BigNum& operator>>=(const BigNum& other);
 
 	std::string to_string() const;
+	std::string to_bitstring() const;
 
 private:
 	static constexpr size_t KARATSUBA_THRESHOLD = 30;
 	static constexpr size_t INITIAL_ALLOCATIONS_SIZE = 8;
+
+	size_t leading_digit() const;
 
 	/// @brief use base 2^64 as repr because int64 operations are faster on x86
 	// TODO: look into efficient memory allocation
