@@ -141,9 +141,9 @@ UnsignedBigInt UnsignedBigInt::operator*(const uint64_t& other) const {
 // 	return apply_binary_op(*this, other, &UnsignedBigInt::operator>>=);
 // }
 
-// UnsignedBigInt UnsignedBigInt::operator+(const UnsignedBigInt& other) const {
-// 	return apply_binary_op(*this, other, &UnsignedBigInt::operator+=);
-// }
+UnsignedBigInt UnsignedBigInt::operator+(const UnsignedBigInt& other) const {
+	return apply_binary_op(*this, other, &UnsignedBigInt::operator+=);
+}
 // UnsignedBigInt UnsignedBigInt::operator-(const UnsignedBigInt& other) const {
 // 	return apply_binary_op(*this, other, &UnsignedBigInt::operator-=);
 // }
@@ -273,6 +273,39 @@ UnsignedBigInt& UnsignedBigInt::operator<<=(const uint64_t& other) {
 // ============================================================================
 // Section: assignment algebraic operations for big ints
 // ============================================================================
+UnsignedBigInt& UnsignedBigInt::operator+=(const UnsignedBigInt& other) {
+	size_t min_digit = std::min(m_digits, other.m_digits);
+	size_t max_digit = std::max(m_digits, other.m_digits);
+
+	// reserve 1 more space to account for carry
+	m_container.reserve(max_digit + 1);
+
+	if(other.m_digits > m_digits) {
+		m_container.resize(other.m_digits, 0);
+	}
+
+	__uint128_t carry = 0;
+	for(size_t i = 0; i < max_digit; i++) {
+		const __uint128_t lhs = m_container[i];
+		const __uint128_t rhs = other.m_container[i];
+		const __uint128_t sum = lhs + rhs + carry;
+
+		m_container[i] = sum & UnsignedBigInt::LOWER_MASK_128;
+		carry = sum >> 64;
+	}
+
+	m_digits = max_digit;
+	if(carry) {
+		if(m_digits < m_container.size()) {
+			m_container[m_digits] = carry;
+		} else {
+			m_container.push_back(carry);
+		}
+		m_digits++;
+	}
+
+	return *this;
+}
 
 UnsignedBigInt& UnsignedBigInt::operator*=(const UnsignedBigInt& other) {
 
