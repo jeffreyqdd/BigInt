@@ -1,4 +1,5 @@
 # build artifacts
+build/*
 build-Debug/*
 build-Release/*
 build-RelWithDebInfo/*
