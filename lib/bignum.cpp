@@ -456,7 +456,24 @@ UnsignedBigInt& UnsignedBigInt::operator^=(const UnsignedBigInt& other) {
 	return *this;
 }
 
-UnsignedBigInt& UnsignedBigInt::operator%=(const UnsignedBigInt& other) { }
+UnsignedBigInt& UnsignedBigInt::operator%=(const UnsignedBigInt& other) {
+	if(other == UnsignedBigInt(0)) {
+		throw BigNumDivideByZeroException();
+	}
+
+	UnsignedBigInt divisor = other;
+	int shift = most_significant_bit() - divisor.most_significant_bit();
+	divisor <<= shift;
+
+	for(int i = shift; i >= 0; --i) {
+		if(*this >= divisor) {
+			*this -= divisor;
+		}
+		divisor >>= 1;
+	}
+
+	return *this;
+}
 
 // ============================================================================
 // Section: operators
