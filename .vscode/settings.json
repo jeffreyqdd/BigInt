@@ -1,0 +1,14 @@
+{
+    "C_Cpp.default.compilerPath": "/usr/bin/gcc-13",
+    "files.associations": {
+        "*.tpp": "cpp",
+        "vector": "cpp",
+        "limits": "cpp",
+        "string_view": "cpp",
+        "ostream": "cpp"
+    },
+    "cSpell.words": [
+        "KARATSUBA",
+        "tparam"
+    ],
+}
